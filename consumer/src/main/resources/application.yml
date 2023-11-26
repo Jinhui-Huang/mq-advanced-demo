@@ -13,3 +13,10 @@ spring:
     listener:
       simple:
         prefetch: 1
+        acknowledge-mode: auto
+        retry:
+          enabled: true # 开启失败重试机制
+          initial-interval: 1000 # 初始的失败等待时间
+          multiplier: 3 # 下次失败的等待时长倍数, 下次等待时长 = multiplier * last-interval
+          max-attempts: 4 # 最大重试次数
+          stateless: true # true 无状态; false 有状态. 如果业务中包含业务, 这里改为false
