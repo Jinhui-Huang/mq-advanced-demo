@@ -127,4 +127,19 @@ public class SpringAmqpTest {
 
         log.info("发送消息成功");
     }
+
+    @Test
+    public void testSendQuorumMessage() {
+        /*1. 准备消息*/
+        /*1. 准备消息*/
+        /*Message message = MessageBuilder.withBody("hello, delay message".getBytes(StandardCharsets.UTF_8))
+                .setDeliveryMode(MessageDeliveryMode.PERSISTENT)
+                .setHeader("x-delay", 5000)
+                .build();*/
+
+        /*3. 发送消息*/
+        rabbitTemplate.convertAndSend("canal.exchange", "canal-routingkey", "hello canal");
+
+        log.info("发送消息成功");
+    }
 }

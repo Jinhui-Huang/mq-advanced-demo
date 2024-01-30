@@ -759,17 +759,70 @@ RabbitMQ的底层是基于Erlang语言编写的, 而Erlang又是一个面向并�
 
 ### 2. 普通集群
 
+普通集群, 或者叫做标准集群 (classic cluster), 具备下列特征:
+
+- 会在集群的各个节点间共享部分数据, 包括: 交换机, 队列元信息. 不包含队列中的消息.
+- 当访问集群某节点时, 如果队列不在该节点, 会从数据所在节点传递到当前节点并返回
+- 队列所在节点宕机, 队列中的消息就会丢失
+
+普通集群安装参考:
+
+[rabbitmq安装指南](src/main/resources/RabbitMQ部署指南.md)
+
+
+
+springboot整合rabbitmq集群配置:
+
+``````yaml
+spring:
+  rabbitmq:
+    addresses: 192.168.43.33:5673, 192.168.43.33:5674, 192.168.43.33:5675 # 集群节点配置
+    username: rabbitmq
+    password: rabbitmq
+    virtual-host: /
+``````
+
 
 
 ### 3. 镜像集群
+
+镜像集群: 本质是主从模式, 具备下面特征:
+
+- 交换机, 队列, 队列中的消息会在各个mq的镜像节点之间同步备份.
+- 创建队列的节点被称为该队列的主节点, 备份到其他节点叫做该队列的镜像节点.
+- 一个队列的主节点可能是另一个队列的镜像节点.
+- 所有操作都是主节点完成, 然后同步给镜像节点
+- 主节点宕机后, 镜像节点会替代成新的主节点
+
+普通集群安装参考:
+
+[rabbitmq安装指南](src/main/resources/RabbitMQ部署指南.md)
 
 
 
 ### 4. 仲裁队列
 
+仲裁队列: 仲裁队列是3.8版本以后才有的新功能, 用来代替镜像队列, 具备以下特征:
+
+- 与镜像队列一样, 都是主从模式, 支持主从数据同步
+- 使用非常简单, 没有复杂的配置
+- 主从同步基于Raft协议, 强一致
 
 
 
+**SpringAMQP创建仲裁队列:**
+
+``````java
+@Configuration
+public class ClusterConfig {
+
+    @Bean
+    public Queue quorumQueue() {
+        return QueueBuilder.durable("quorum.queue").quorum().build();
+    }
+}
+
+``````
 
 
 

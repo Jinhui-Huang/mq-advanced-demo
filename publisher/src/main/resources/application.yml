@@ -1,3 +1,5 @@
+server:
+  port: 10086
 logging:
   pattern:
     dateformat: HH:mm:ss:SSS
@@ -5,10 +7,11 @@ logging:
     cn.itcast: debug
 spring:
   rabbitmq:
-    host: 192.168.43.33 # rabbitMQ的ip地址
-    port: 5672 # 端口
-    username: itcast
-    password: 123321
+#    host: 192.168.43.33 # rabbitMQ的ip地址
+#    port: 5672 # 端口
+    addresses: 192.168.43.33:5673, 192.168.43.33:5674, 192.168.43.33:5675 # 集群节点配置
+    username: rabbitmq
+    password: rabbitmq
     virtual-host: /
     publisher-confirm-type: correlated
     publisher-returns: true

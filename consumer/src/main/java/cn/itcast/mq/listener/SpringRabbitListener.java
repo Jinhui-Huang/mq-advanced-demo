@@ -1,17 +1,24 @@
 package cn.itcast.mq.listener;
 
+import cn.itcast.pojo.User;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.rabbitmq.client.ConnectionFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.ExchangeTypes;
 import org.springframework.amqp.rabbit.annotation.Exchange;
 import org.springframework.amqp.rabbit.annotation.Queue;
 import org.springframework.amqp.rabbit.annotation.QueueBinding;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
 public class SpringRabbitListener {
 
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     /**
      * Description: listenSimpleQueue 声明队列和交换机, 同时绑定routingKey, 交换机模式为topic
@@ -21,8 +28,9 @@ public class SpringRabbitListener {
      * @Date 2023/11/26
      */
     @RabbitListener(queues = "simple.queue")
-    public void listenSimpleQueue(String msg) {
-        System.out.println("消费者接收到simple.queue的消息：【" + msg + "】");
+    public void listenSimpleQueue(String msg) throws JsonProcessingException {
+        User user = OBJECT_MAPPER.readValue(msg, User.class);
+        System.out.println("消费者接收到simple.queue的消息：【" + user + "】");
         // System.out.println(1 / 0); /*测试异常*/
         log.info("消费者处理消息成功");
     }
@@ -82,7 +90,7 @@ public class SpringRabbitListener {
     }
 
     /**
-     * Description: listenLazyQueue 处理惰性队列的堆积消息, 请子啊测试时打开注解
+     * Description: listenLazyQueue 处理惰性队列的堆积消息, 请在测试时打开注解
      * @return void
      * @author jinhui-huang
      * @Date 2023/11/26
@@ -92,5 +100,10 @@ public class SpringRabbitListener {
         log.info("接收到了lazy.queue的消息 ==> " + msg);
     }
 
+
+    @RabbitListener(queues = "${spring.rabbitmq.canal-queue}")
+    public void listenQuorumQueue(String msg) {
+        log.info("接收到了canal.queue的消息 ==> " + msg);
+    }
 
 }
